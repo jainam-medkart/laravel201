@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MoleculeController;
 use App\Models\Molecule;
 use Illuminate\Support\Facades\Route;
@@ -20,4 +21,13 @@ Route::prefix('molecules')->group(function () {
     Route::post('/', [MoleculeController::class, 'create'])->middleware('auth:sanctum');
     Route::put('/{id}', [MoleculeController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/{id}', [MoleculeController::class, 'delete'])->middleware('auth:sanctum');
+});
+
+Route::prefix('categories')->group( function() {
+    Route::get('/', [CategoryController::class, 'getAllActive']);
+    Route::get('/all', [CategoryController::class, 'getAll'])->middleware('auth:sanctum');
+    Route::get('/{id}', [CategoryController::class, 'getById']);
+    Route::post('/', [CategoryController::class, 'create'])->middleware('auth:sanctum');
+    Route::put('/{id}', [CategoryController::class, 'update'])->middleware('auth:sanctum');
+    Route::delete('/{id}', [CategoryController::class, 'delete'])->middleware('auth:sanctum');
 });
