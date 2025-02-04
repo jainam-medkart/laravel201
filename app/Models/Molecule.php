@@ -12,7 +12,7 @@ class Molecule extends Model
 
     protected $fillable = ['name', 'description', 'is_active', 'created_by', 'updated_by', 'deleted_by'];
 
-    protected $hidden = ['created_by', 'updated_by', 'deleted_by', 'updated_at', 'created_at' , 'deleted_at'];
+    protected $hidden = ['pivot','created_by', 'updated_by', 'deleted_by', 'updated_at', 'created_at' , 'deleted_at'];
 
     public function creator()
     {
@@ -22,5 +22,10 @@ class Molecule extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function draftProducts()
+    {
+        return $this->belongsToMany(DraftProduct::class, 'draft_product_molecule');
     }
 }

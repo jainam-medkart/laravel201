@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DraftProductController;
 use App\Http\Controllers\MoleculeController;
 use App\Models\Molecule;
 use Illuminate\Support\Facades\Route;
@@ -32,4 +33,14 @@ Route::prefix('categories')->group( function() {
     Route::put('/{id}', [CategoryController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/{id}', [CategoryController::class, 'delete'])->middleware('auth:sanctum');
     Route::put('/{id}/restore', [CategoryController::class, 'restore'])->middleware('auth:sanctum');
+});
+
+Route::prefix('draft-products')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [DraftProductController::class, 'getAllActive']);
+    Route::get('/all', [DraftProductController::class, 'getAll']);
+    Route::get('/{id}', [DraftProductController::class, 'getById']);
+    Route::post('/', [DraftProductController::class, 'create']);
+    Route::put('/{id}', [DraftProductController::class, 'update']);
+    Route::delete('/{id}', [DraftProductController::class, 'delete']);
+    Route::put('/{id}/restore', [DraftProductController::class, 'restore']);
 });

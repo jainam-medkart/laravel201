@@ -26,4 +26,8 @@ class Category extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function draftProducts()
+    {
+        return $this->hasMany(DraftProduct::class);
+    }
 }
