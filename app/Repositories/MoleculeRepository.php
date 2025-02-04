@@ -8,12 +8,12 @@ class MoleculeRepository
 {
     public function getActive()
     {
-        return Molecule::where('is_active', true)->get();
+        return Molecule::where('is_active', true)->whereNull('deleted_at')->get();
     }
 
     public function getAll()
     {
-        return Molecule::all();
+        return Molecule::withTrashed()->get();
     }
 
     public function find($id)
@@ -40,7 +40,19 @@ class MoleculeRepository
             'is_active' => false,
             'deleted_by' => auth()->id(),
         ]);
-        
+        $molecule->delete();
+        return $molecule;
+    }
+
+    public function restore($id)
+    {
+        $molecule = Molecule::withTrashed()->findOrFail($id);
+        $molecule->update([
+            'is_active' => true,
+            'deleted_by' => null,
+            'deleted_at' => null,
+        ]);
+        $molecule->restore();
         return $molecule;
     }
 }

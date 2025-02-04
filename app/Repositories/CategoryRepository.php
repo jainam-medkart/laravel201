@@ -8,12 +8,12 @@ class CategoryRepository {
 
     public function getActive()
     {
-        return Category::where('is_active', true)->get();
+        return Category::where('is_active', true)->whereNull('deleted_at')->get();
     }
 
     public function getAll()
     {
-        return Category::all();
+        return Category::withTrashed()->get();
     }
 
     public function find($id)
@@ -40,7 +40,19 @@ class CategoryRepository {
             'is_active' => false,
             'deleted_by' => auth()->id(),
         ]);
+        $category->delete();
         return $category;
     }
 
+    public function restore($id)
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+        $category->update([
+            'is_active' => true,
+            'deleted_by' => null,
+            'deleted_at' => null,
+        ]);
+        $category->restore();
+        return $category;
+    }
 }

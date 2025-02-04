@@ -102,4 +102,14 @@ class CategoryController extends Controller {
             return ApiErrorResponse::create($e, 500);
         }
     }
+
+    public function restore($id)
+    {
+        try {
+            $category = $this->categoryRepository->restore($id);
+            return ApiSuccessResponse::create($category, 'Category restored successfully');
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
+        }
+    }
 }

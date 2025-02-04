@@ -109,4 +109,14 @@ class MoleculeController extends Controller {
             return ApiErrorResponse::create($e, 500);
         }
     }
+
+    public function restore($id)
+    {
+        try {
+            $molecule = $this->moleculeRepository->restore($id);
+            return ApiSuccessResponse::create($molecule, 'Molecule restored successfully');
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
+        }
+    }
 }

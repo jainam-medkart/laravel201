@@ -21,6 +21,7 @@ Route::prefix('molecules')->group(function () {
     Route::post('/', [MoleculeController::class, 'create'])->middleware('auth:sanctum');
     Route::put('/{id}', [MoleculeController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/{id}', [MoleculeController::class, 'delete'])->middleware('auth:sanctum');
+    Route::put('/{id}/restore', [MoleculeController::class, 'restore'])->middleware('auth:sanctum');
 });
 
 Route::prefix('categories')->group( function() {
@@ -30,4 +31,5 @@ Route::prefix('categories')->group( function() {
     Route::post('/', [CategoryController::class, 'create'])->middleware('auth:sanctum');
     Route::put('/{id}', [CategoryController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/{id}', [CategoryController::class, 'delete'])->middleware('auth:sanctum');
+    Route::put('/{id}/restore', [CategoryController::class, 'restore'])->middleware('auth:sanctum');
 });
