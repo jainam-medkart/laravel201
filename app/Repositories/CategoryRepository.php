@@ -36,7 +36,10 @@ class CategoryRepository {
     public function softDelete($id)
     {
         $category = Category::findOrFail($id);
-        $category->update(['is_active' => false]);
+        $category->update([
+            'is_active' => false,
+            'deleted_by' => auth()->id(),
+        ]);
         return $category;
     }
 

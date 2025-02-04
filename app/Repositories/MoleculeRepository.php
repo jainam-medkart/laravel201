@@ -36,7 +36,11 @@ class MoleculeRepository
     public function softDelete($id)
     {
         $molecule = Molecule::findOrFail($id);
-        $molecule->update(['is_active' => false]);
+        $molecule->update([
+            'is_active' => false,
+            'deleted_by' => auth()->id(),
+        ]);
+        
         return $molecule;
     }
 }

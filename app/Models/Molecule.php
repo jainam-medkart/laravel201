@@ -9,9 +9,9 @@ class Molecule extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'is_active', 'created_by', 'updated_by'];
+    protected $fillable = ['name', 'description', 'is_active', 'created_by', 'updated_by', 'deleted_by'];
 
-    protected $hidden = ['created_by', 'updated_by', 'updated_at', 'created_at'];
+    protected $hidden = ['created_by', 'updated_by', 'deleted_by', 'updated_at', 'created_at'];
 
     public function creator()
     {
