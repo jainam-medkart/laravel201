@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\DraftProduct;
 use App\Models\PublishedProduct;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PublishedProductRepository {
@@ -26,7 +27,11 @@ class PublishedProductRepository {
     }
 
     public function getById($id) {
-        return PublishedProduct::with(['category', 'molecules'])->findOrFail($id);
+        $cacheKey = "published_product_{$id}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($id) {
+            return PublishedProduct::with(['category', 'molecules'])->findOrFail($id);
+        });
     }
 
     public function getLastWsCode()
@@ -141,7 +146,7 @@ class PublishedProductRepository {
                 'updated_by' => $draftProduct->updated_by,
                 'deleted_by' => $draftProduct->deleted_by,
                 'draft_product_id' => $draftProduct->id,
-                'published_by' => $userId, // Ensure published_by is set
+                'published_by' => $userId,
                 'published_at' => now(),
                 'combination_string' => $combinationString, // Set combination_string
                 'ws_code' => $wsCode . "", // Set ws_code

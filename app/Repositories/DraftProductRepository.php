@@ -5,30 +5,44 @@ namespace App\Repositories;
 use App\Jobs\UpdatePublishedProduct as JobsUpdatePublishedProduct;
 use App\Models\Category;
 use App\Models\DraftProduct;
-use App\Models\PublishedProduct;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use UpdatePublishedProduct;
 
 class DraftProductRepository {
 
     public function getActive($perPage = 15)
     {
-        return DraftProduct::with(['category', 'molecules'])
-            ->where('is_active', true)
-            ->whereNull('deleted_at')
-            ->paginate($perPage);
+        $cacheKey = "draft_products_active_{$perPage}";
+
+        // Check if the data is in the cache and return it if it exists
+        return Cache::remember($cacheKey, 3600, function () use ($perPage) {
+            return DraftProduct::with(['category', 'molecules'])
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->paginate($perPage);
+        });
     }
 
     public function getAll($perPage = 15)
     {
-        return DraftProduct::with(['category', 'molecules'])
-            ->withTrashed()
-            ->paginate($perPage);
+        $cacheKey = "draft_products_all_{$perPage}";
+
+        // Check if the data is in the cache and return it if it exists
+        return Cache::remember($cacheKey, 3600, function () use ($perPage) {
+            return DraftProduct::with(['category', 'molecules'])
+                ->withTrashed()
+                ->paginate($perPage);
+        });
     }
 
     public function getById($id) {
-        return DraftProduct::with(['category', 'molecules'])->findOrFail($id);
+        $cacheKey = "draft_product_{$id}";
+
+        // Check if the data is in the cache and return it if it exists
+        return Cache::remember($cacheKey, 3600, function () use ($id) {
+            return DraftProduct::with(['category', 'molecules'])->findOrFail($id);
+        });
     }
 
     public function create(array $data)
@@ -47,6 +61,10 @@ class DraftProductRepository {
                 $draftProduct->category()->associate(Category::findOrFail($categoryId));
                 $draftProduct->save();
             }
+
+            // Clear relevant caches
+            Cache::forget("draft_products_active_{$data['per_page']}");
+            Cache::forget("draft_products_all_{$data['per_page']}");
 
             return $draftProduct->load(['category', 'molecules']);
         });
@@ -71,6 +89,11 @@ class DraftProductRepository {
                 $draftProduct->save();
             }
 
+            // Clear relevant caches
+            Cache::forget("draft_product_{$id}");
+            Cache::forget("draft_products_active_{$data['per_page']}");
+            Cache::forget("draft_products_all_{$data['per_page']}");
+
             return $draftProduct->load(['category', 'molecules']);
         });
     }
@@ -84,10 +107,14 @@ class DraftProductRepository {
                 JobsUpdatePublishedProduct::dispatch($draftProduct);
             }
 
+            // Clear relevant caches
+            Cache::forget("draft_product_{$id}");
+            Cache::forget("draft_products_active_{$data['per_page']}");
+            Cache::forget("draft_products_all_{$data['per_page']}");
+
             return $draftProduct;
         });
     }
-
 
     public function softDelete($id)
     {
@@ -97,6 +124,12 @@ class DraftProductRepository {
             'deleted_by' => Auth::id(),
         ]);
         $draftProduct->delete();
+
+        // Clear relevant caches
+        Cache::forget("draft_product_{$id}");
+        Cache::forget("draft_products_active_15");
+        Cache::forget("draft_products_all_15");
+
         return $draftProduct;
     }
 
@@ -109,6 +142,12 @@ class DraftProductRepository {
             'deleted_at' => null,
         ]);
         $draftProduct->restore();
+
+        // Clear relevant caches
+        Cache::forget("draft_product_{$id}");
+        Cache::forget("draft_products_active_15");
+        Cache::forget("draft_products_all_15");
+
         return $draftProduct;
     }
 }
