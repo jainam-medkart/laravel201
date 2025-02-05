@@ -63,8 +63,8 @@ class DraftProductRepository {
             }
 
             // Clear relevant caches
-            Cache::forget("draft_products_active_{$data['per_page']}");
-            Cache::forget("draft_products_all_{$data['per_page']}");
+            Cache::forget("draft_products_active_15");
+            Cache::forget("draft_products_all_15");
 
             return $draftProduct->load(['category', 'molecules']);
         });
@@ -73,7 +73,6 @@ class DraftProductRepository {
     public function update($id, array $data)
     {
         return DB::transaction(function () use ($id, $data) {
-
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
 
@@ -91,8 +90,8 @@ class DraftProductRepository {
 
             // Clear relevant caches
             Cache::forget("draft_product_{$id}");
-            Cache::forget("draft_products_active_{$data['per_page']}");
-            Cache::forget("draft_products_all_{$data['per_page']}");
+            Cache::forget("draft_products_active_15");
+            Cache::forget("draft_products_all_15");
 
             return $draftProduct->load(['category', 'molecules']);
         });
@@ -109,8 +108,8 @@ class DraftProductRepository {
 
             // Clear relevant caches
             Cache::forget("draft_product_{$id}");
-            Cache::forget("draft_products_active_{$data['per_page']}");
-            Cache::forget("draft_products_all_{$data['per_page']}");
+            Cache::forget("draft_products_active_15");
+            Cache::forget("draft_products_all_15");
 
             return $draftProduct;
         });

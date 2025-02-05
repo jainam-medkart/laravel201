@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\DB;
 
 class PublishedProductRepository {
 
+    // using : redis/redis-stack-server:latest
+    // To do : Explore exception when cache
+
     public function getActive($perPage = 15)
     {
         return PublishedProduct::with(['category', 'molecules'])
