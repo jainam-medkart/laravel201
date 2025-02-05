@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
+use App\Jobs\PublishDraftProduct;
 use App\Repositories\DraftProductRepository;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 
 class DraftProductController extends Controller {
 
@@ -47,7 +49,6 @@ class DraftProductController extends Controller {
                 'name' => 'required|string|max:255|unique:draft_products,name',
                 'description' => 'nullable|string',
                 'manufacturer' => 'required|string|max:255',
-                'price' => 'required|numeric',
                 'mrp' => 'required|numeric',
                 'is_active' => 'boolean',
                 'is_banned' => 'boolean',
@@ -86,7 +87,6 @@ class DraftProductController extends Controller {
                 'name' => 'required|string|max:255|unique:draft_products,name,' . $id,
                 'description' => 'nullable|string',
                 'manufacturer' => 'required|string|max:255',
-                'price' => 'required|numeric',
                 'mrp' => 'required|numeric',
                 'is_active' => 'boolean',
                 'is_banned' => 'boolean',
@@ -132,6 +132,21 @@ class DraftProductController extends Controller {
         try {
             $draftProduct = $this->draftProductRepository->restore($id);
             return ApiSuccessResponse::create($draftProduct, 'Draft product restored successfully');
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
+        }
+    }
+
+    public function publish($id)
+    {
+        try {
+            $draftProduct = $this->draftProductRepository->getById($id);
+
+            $draftProduct->load(['category', 'molecules']);
+
+            PublishDraftProduct::dispatch($draftProduct, Auth::id());
+
+            return ApiSuccessResponse::create(null, 'Draft product is being published');
         } catch (Exception $e) {
             return ApiErrorResponse::create($e, 500);
         }

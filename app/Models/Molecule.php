@@ -28,4 +28,9 @@ class Molecule extends Model
     {
         return $this->belongsToMany(DraftProduct::class, 'draft_product_molecule');
     }
+
+    public function publishedProducts()
+    {
+        return $this->belongsToMany(PublishedProduct::class, 'published_product_molecule');
+    }
 }

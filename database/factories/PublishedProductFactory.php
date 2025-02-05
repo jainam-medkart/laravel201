@@ -5,12 +5,13 @@ namespace Database\Factories;
 use App\Models\Category;
 use App\Models\DraftProduct;
 use App\Models\Molecule;
+use App\Models\PublishedProduct;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class DraftProductFactory extends Factory
+class PublishedProductFactory extends Factory
 {
-    protected $model = DraftProduct::class;
+    protected $model = PublishedProduct::class;
 
     public function definition()
     {
@@ -25,19 +26,19 @@ class DraftProductFactory extends Factory
             'is_discountinued' => $this->faker->boolean,
             'is_refrigerated' => $this->faker->boolean,
             'is_published' => $this->faker->boolean,
-            'status' => $this->faker->randomElement(['draft', 'pending', 'approved', 'rejected']),
             'category_id' => Category::factory(),
             'created_by' => User::factory(),
-            'updated_by' => null,
+            'updated_by' => User::factory(),
+            'deleted_by' => null,
+            'draft_product_id' => DraftProduct::factory(),
         ];
     }
 
     public function configure()
     {
-        return $this->afterCreating(function (DraftProduct $draftProduct) {
+        return $this->afterCreating(function (PublishedProduct $publishedProduct) {
             $molecules = Molecule::factory()->count(3)->create();
-            $draftProduct->molecules()->attach($molecules->pluck('id')->toArray());
+            $publishedProduct->molecules()->attach($molecules->pluck('id')->toArray());
         });
     }
-    
 }

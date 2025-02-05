@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DraftProduct extends Model
+class PublishedProduct extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -25,7 +25,9 @@ class DraftProduct extends Model
         'category_id',
         'created_by',
         'updated_by',
-        'deleted_by'
+        'deleted_by',
+        'published_by',
+        'draft_product_id'
     ];
 
     protected $hidden = [
@@ -54,11 +56,16 @@ class DraftProduct extends Model
 
     public function molecules()
     {
-        return $this->belongsToMany(Molecule::class, 'draft_product_molecule');
+        return $this->belongsToMany(Molecule::class, 'published_product_molecule');
     }
 
-    public function publishedProduct()
+    public function draftProduct()
     {
-        return $this->hasOne(PublishedProduct::class);
+        return $this->belongsTo(DraftProduct::class);
+    }
+
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'published_by');
     }
 }
