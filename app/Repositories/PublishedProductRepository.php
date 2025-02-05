@@ -29,11 +29,25 @@ class PublishedProductRepository {
         return PublishedProduct::with(['category', 'molecules'])->findOrFail($id);
     }
 
+    public function getLastWsCode()
+    {
+        return PublishedProduct::max('ws_code');
+    }
+
+    public function generateWsCode()
+    {
+        $lastWsCode = $this->getLastWsCode();
+        return $lastWsCode ? $lastWsCode + 1 : 100;
+    }
+
     public function create(array $data)
     {
         return DB::transaction(function () use ($data) {
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
+
+            // Generate ws_code
+            $data['ws_code'] = $this->generateWsCode();
 
             $publishedProduct = PublishedProduct::create($data);
 
@@ -78,6 +92,7 @@ class PublishedProductRepository {
             $draftProduct = DraftProduct::with(['category', 'molecules'])->findOrFail($id);
 
             if ($draftProduct->is_published) {
+                $combinationString = $draftProduct->molecules->pluck('name')->implode('+');
                 $publishedProduct = PublishedProduct::where('draft_product_id', $id)->firstOrFail();
                 $publishedProduct->update([
                     'name' => $draftProduct->name,
@@ -92,6 +107,7 @@ class PublishedProductRepository {
                     'category_id' => $draftProduct->category_id,
                     'updated_by' => $draftProduct->updated_by,
                     'updated_at' => now(),
+                    'combination_string' => $combinationString, // Set combination_string
                 ]);
 
                 $publishedProduct->molecules()->sync($draftProduct->molecules->pluck('id')->toArray());
@@ -104,6 +120,12 @@ class PublishedProductRepository {
     public function publish(DraftProduct $draftProduct, $userId)
     {
         return DB::transaction(function () use ($draftProduct, $userId) {
+            // Generate combination_string
+            $combinationString = $draftProduct->molecules->pluck('name')->implode('+');
+
+            // Generate ws_code
+            $wsCode = $this->generateWsCode();
+
             $publishedProduct = PublishedProduct::create([
                 'name' => $draftProduct->name,
                 'description' => $draftProduct->description,
@@ -119,12 +141,15 @@ class PublishedProductRepository {
                 'updated_by' => $draftProduct->updated_by,
                 'deleted_by' => $draftProduct->deleted_by,
                 'draft_product_id' => $draftProduct->id,
-                'published_by' => $userId,
+                'published_by' => $userId, // Ensure published_by is set
                 'published_at' => now(),
+                'combination_string' => $combinationString, // Set combination_string
+                'ws_code' => $wsCode . "", // Set ws_code
             ]);
 
             $publishedProduct->molecules()->attach($draftProduct->molecules->pluck('id')->toArray());
 
+            // dump($publishedProduct);
             // Update the draft product
             $draftProduct->update([
                 'is_published' => true,

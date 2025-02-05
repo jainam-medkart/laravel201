@@ -12,6 +12,8 @@ class PublishedProduct extends Model
 
     protected $fillable = [
         'name',
+        'ws_code',
+        'combination_string',
         'description',
         'manufacturer',
         'mrp',
@@ -29,7 +31,7 @@ class PublishedProduct extends Model
         'published_by',
         'draft_product_id'
     ];
-
+    
     protected $hidden = [
         'created_by',
         'updated_by',

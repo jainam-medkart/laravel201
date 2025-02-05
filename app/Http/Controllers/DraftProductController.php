@@ -163,6 +163,7 @@ class DraftProductController extends Controller {
 
             $draftProduct->load(['category', 'molecules']);
 
+            
             PublishDraftProduct::dispatch($draftProduct, Auth::id());
 
             return ApiSuccessResponse::create(null, 'Draft product is being published');

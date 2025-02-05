@@ -37,7 +37,9 @@ class PublishDraftProduct implements ShouldQueue
     public function handle(PublishedProductRepository $publishProductRepository)
     {
         try {
+            Log::info('Publishing draft product', ['draft_product_id' => $this->draftProduct->id, 'user_id' => $this->userId]);
             $publishProductRepository->publish($this->draftProduct, $this->userId);
+            Log::info('Draft product published successfully', ['draft_product_id' => $this->draftProduct->id, 'user_id' => $this->userId]);
         } catch (\Exception $e) {
             Log::error('Failed to publish draft product', [
                 'draft_product_id' => $this->draftProduct->id,

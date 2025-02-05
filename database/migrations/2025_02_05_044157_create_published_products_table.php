@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('published_products', function (Blueprint $table) {
             $table->id();
+            $table->string('ws_code')->unique();
+            $table->text('combination_string')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('manufacturer');
