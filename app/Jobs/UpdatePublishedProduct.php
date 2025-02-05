@@ -11,22 +11,20 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class PublishDraftProduct implements ShouldQueue
+class UpdatePublishedProduct implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $draftProduct;
-    protected $userId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(DraftProduct $draftProduct, $userId)
+    public function __construct(DraftProduct $draftProduct)
     {
         $this->draftProduct = $draftProduct;
-        $this->userId = $userId;
     }
 
     /**
@@ -37,11 +35,10 @@ class PublishDraftProduct implements ShouldQueue
     public function handle(PublishProductRepository $publishProductRepository)
     {
         try {
-            $publishProductRepository->publish($this->draftProduct, $this->userId);
+            $publishProductRepository->updatePublishedProduct($this->draftProduct->id, $this->draftProduct->toArray());
         } catch (\Exception $e) {
-            Log::error('Failed to publish draft product', [
+            Log::error('Failed to update published product', [
                 'draft_product_id' => $this->draftProduct->id,
-                'user_id' => $this->userId,
                 'error' => $e->getMessage(),
             ]);
         }

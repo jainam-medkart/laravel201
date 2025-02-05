@@ -44,4 +44,6 @@ Route::prefix('draft-products')->middleware('auth:sanctum')->group(function () {
     Route::delete('/{id}', [DraftProductController::class, 'delete']);
     Route::put('/{id}/restore', [DraftProductController::class, 'restore']);
     Route::post('/{id}/publish', [DraftProductController::class, 'publish']);
+    Route::post('/{id}/update-published', [DraftProductController::class, 'updatePublished']);
+    Route::put('/{id}/status', [DraftProductController::class, 'updateStatus']);
 });

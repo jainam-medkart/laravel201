@@ -2,10 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Jobs\UpdatePublishedProduct as JobsUpdatePublishedProduct;
 use App\Models\Category;
 use App\Models\DraftProduct;
+use App\Models\PublishedProduct;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use UpdatePublishedProduct;
 
 class DraftProductRepository {
 
@@ -71,6 +74,20 @@ class DraftProductRepository {
             return $draftProduct->load(['category', 'molecules']);
         });
     }
+
+    public function updatePublishedProduct($id, array $data)
+    {
+        return DB::transaction(function () use ($id, $data) {
+            $draftProduct = $this->update($id, $data);
+
+            if ($draftProduct->is_published) {
+                JobsUpdatePublishedProduct::dispatch($draftProduct);
+            }
+
+            return $draftProduct;
+        });
+    }
+
 
     public function softDelete($id)
     {

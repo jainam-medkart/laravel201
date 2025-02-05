@@ -7,6 +7,7 @@ use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Jobs\PublishDraftProduct;
 use App\Repositories\DraftProductRepository;
+use App\Repositories\PublishProductRepository;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,10 +18,12 @@ use Illuminate\Support\Facades\Auth;
 class DraftProductController extends Controller {
 
     protected $draftProductRepository;
+    protected $publishProductRepository;
 
-    public function __construct(DraftProductRepository $draftProductRepository)
+    public function __construct(DraftProductRepository $draftProductRepository, PublishProductRepository $publishProductRepository)
     {
         $this->draftProductRepository = $draftProductRepository;
+        $this->publishProductRepository = $publishProductRepository;
     }
 
     public function getAll()
@@ -99,7 +102,6 @@ class DraftProductController extends Controller {
                 'is_discountinued' => 'boolean',
                 'is_refrigerated' => 'boolean',
                 'is_published' => 'boolean',
-                'status' => 'required|string|in:draft,pending,approved,rejected',
                 'category_id' => 'required|exists:categories,id',
                 'molecule_ids' => 'array|exists:molecules,id',
             ]);
@@ -107,9 +109,11 @@ class DraftProductController extends Controller {
             if ($validator->fails()) {
                 throw new ValidationException($validator);
             }
-
-            $data = $request->all();
+            
+            $data = $request->except('status');
+            $data = $request->except('is_published');
             $data['updated_by'] = auth()->id();
+
             $draftProduct = $this->draftProductRepository->update($id, $data);
 
             return ApiSuccessResponse::create($draftProduct, 'Draft product updated successfully');
@@ -156,6 +160,58 @@ class DraftProductController extends Controller {
             PublishDraftProduct::dispatch($draftProduct, Auth::id());
 
             return ApiSuccessResponse::create(null, 'Draft product is being published');
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
+        }
+    }
+
+    public function updatePublished($id)
+    {
+        try {
+            $draftProduct = $this->draftProductRepository->getById($id);
+
+            if (!$draftProduct->is_published) {
+                return ApiErrorResponse::create(new Exception('Draft product is not published.'), 400);
+            }
+            
+            if ($draftProduct->status !== DraftProductStatus::APPROVED) {
+                return ApiErrorResponse::create(new Exception('Updated Draft product status must be approved to publish.'), 400);
+            }
+
+            // Fetch the current draft product data and pass it to the repository
+            $this->publishProductRepository->updatePublishedProduct($id);
+
+            return ApiSuccessResponse::create(null, 'Published product update job dispatched successfully');
+        } catch (ValidationException $e) {
+            return ApiErrorResponse::create($e, 422, $e->errors());
+        } catch (QueryException $e) {
+            return ApiErrorResponse::create($e, 400);
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'status' => 'required|string|in:' . implode(',', [DraftProductStatus::DRAFT, DraftProductStatus::PENDING, DraftProductStatus::APPROVED, DraftProductStatus::REJECTED]),
+            ]);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            $data = $request->only('status');
+            $data['updated_by'] = auth()->id();
+
+            $draftProduct = $this->draftProductRepository->update($id, $data);
+
+            return ApiSuccessResponse::create($draftProduct, 'Draft product status updated successfully');
+        } catch (ValidationException $e) {
+            return ApiErrorResponse::create($e, 422, $e->errors());
+        } catch (QueryException $e) {
+            return ApiErrorResponse::create($e, 400);
         } catch (Exception $e) {
             return ApiErrorResponse::create($e, 500);
         }
