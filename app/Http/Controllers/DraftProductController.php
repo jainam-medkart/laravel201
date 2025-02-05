@@ -151,6 +151,10 @@ class DraftProductController extends Controller {
         try {
             $draftProduct = $this->draftProductRepository->getById($id);
 
+            if ($draftProduct->is_published) {
+                return ApiErrorResponse::create(new Exception('Draft product is already published.'), 400);
+            }
+
             if ($draftProduct->status !== DraftProductStatus::APPROVED) {
                 return ApiErrorResponse::create(new Exception('Draft product status must be approved to publish.'), 400);
             }

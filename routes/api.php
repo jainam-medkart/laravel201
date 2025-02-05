@@ -47,3 +47,4 @@ Route::prefix('draft-products')->middleware('auth:sanctum')->group(function () {
     Route::post('/{id}/update-published', [DraftProductController::class, 'updatePublished']);
     Route::put('/{id}/status', [DraftProductController::class, 'updateStatus']);
 });
+

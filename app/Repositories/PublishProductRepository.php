@@ -12,7 +12,7 @@ class PublishProductRepository {
 
     public function getActive($perPage = 15)
     {
-        return DraftProduct::with(['category', 'molecules'])
+        return PublishedProduct::with(['category', 'molecules'])
             ->where('is_active', true)
             ->whereNull('deleted_at')
             ->paginate($perPage);
@@ -20,13 +20,13 @@ class PublishProductRepository {
 
     public function getAll($perPage = 15)
     {
-        return DraftProduct::with(['category', 'molecules'])
+        return PublishedProduct::with(['category', 'molecules'])
             ->withTrashed()
             ->paginate($perPage);
     }
 
     public function getById($id) {
-        return DraftProduct::with(['category', 'molecules'])->findOrFail($id);
+        return PublishedProduct::with(['category', 'molecules'])->findOrFail($id);
     }
 
     public function create(array $data)
@@ -35,18 +35,18 @@ class PublishProductRepository {
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
 
-            $draftProduct = DraftProduct::create($data);
+            $publishedProduct = PublishedProduct::create($data);
 
             if (!empty($moleculeIds)) {
-                $draftProduct->molecules()->attach($moleculeIds);
+                $publishedProduct->molecules()->attach($moleculeIds);
             }
 
             if ($categoryId) {
-                $draftProduct->category()->associate(Category::findOrFail($categoryId));
-                $draftProduct->save();
+                $publishedProduct->category()->associate(Category::findOrFail($categoryId));
+                $publishedProduct->save();
             }
 
-            return $draftProduct->load(['category', 'molecules']);
+            return $publishedProduct->load(['category', 'molecules']);
         });
     }
 
@@ -56,19 +56,19 @@ class PublishProductRepository {
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
 
-            $draftProduct = DraftProduct::findOrFail($id);
-            $draftProduct->update($data);
+            $publishedProduct = PublishedProduct::findOrFail($id);
+            $publishedProduct->update($data);
 
             if (!empty($moleculeIds)) {
-                $draftProduct->molecules()->sync($moleculeIds);
+                $publishedProduct->molecules()->sync($moleculeIds);
             }
 
             if ($categoryId) {
-                $draftProduct->category()->associate(Category::findOrFail($categoryId));
-                $draftProduct->save();
+                $publishedProduct->category()->associate(Category::findOrFail($categoryId));
+                $publishedProduct->save();
             }
 
-            return $draftProduct->load(['category', 'molecules']);
+            return $publishedProduct->load(['category', 'molecules']);
         });
     }
 
@@ -97,7 +97,7 @@ class PublishProductRepository {
                 $publishedProduct->molecules()->sync($draftProduct->molecules->pluck('id')->toArray());
             }
 
-            return $draftProduct;
+            return $publishedProduct;
         });
     }
 
@@ -136,24 +136,24 @@ class PublishProductRepository {
 
     public function softDelete($id)
     {
-        $draftProduct = DraftProduct::findOrFail($id);
-        $draftProduct->update([
+        $publishedProduct = PublishedProduct::findOrFail($id);
+        $publishedProduct->update([
             'is_active' => false,
             'deleted_by' => Auth::id(),
         ]);
-        $draftProduct->delete();
-        return $draftProduct;
+        $publishedProduct->delete();
+        return $publishedProduct;
     }
 
     public function restore($id)
     {
-        $draftProduct = DraftProduct::withTrashed()->findOrFail($id);
-        $draftProduct->update([
+        $publishedProduct = PublishedProduct::withTrashed()->findOrFail($id);
+        $publishedProduct->update([
             'is_active' => true,
             'deleted_by' => null,
             'deleted_at' => null,
         ]);
-        $draftProduct->restore();
-        return $draftProduct;
+        $publishedProduct->restore();
+        return $publishedProduct;
     }
 }
