@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DraftProductController;
 use App\Http\Controllers\MoleculeController;
+use App\Http\Controllers\PublishedProductController;
 use App\Models\Molecule;
 use Illuminate\Support\Facades\Route;
 
@@ -48,3 +49,9 @@ Route::prefix('draft-products')->middleware('auth:sanctum')->group(function () {
     Route::put('/{id}/status', [DraftProductController::class, 'updateStatus']);
 });
 
+Route::prefix('products')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [PublishedProductController::class, 'getAllActive']);
+    Route::get('/all', [PublishedProductController::class, 'getAll']);
+    Route::get('/{id}', [PublishedProductController::class, 'getById']);
+    Route::post('/', [PublishedProductController::class, 'create']);
+});

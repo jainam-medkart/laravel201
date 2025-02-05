@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('published_product_id')->constrained('published_products')->onDelete('cascade');
             $table->foreignId('molecule_id')->constrained('molecules')->onDelete('cascade');
-            $table->timestamps();
         });
     }
 

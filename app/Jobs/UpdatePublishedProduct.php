@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\DraftProduct;
-use App\Repositories\PublishProductRepository;
+use App\Repositories\PublishedProductRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -32,7 +32,7 @@ class UpdatePublishedProduct implements ShouldQueue
      *
      * @return void
      */
-    public function handle(PublishProductRepository $publishProductRepository)
+    public function handle(PublishedProductRepository $publishProductRepository)
     {
         try {
             $publishProductRepository->updatePublishedProduct($this->draftProduct->id, $this->draftProduct->toArray());

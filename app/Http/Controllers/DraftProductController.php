@@ -7,7 +7,7 @@ use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Jobs\PublishDraftProduct;
 use App\Repositories\DraftProductRepository;
-use App\Repositories\PublishProductRepository;
+use App\Repositories\PublishedProductRepository;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +20,7 @@ class DraftProductController extends Controller {
     protected $draftProductRepository;
     protected $publishProductRepository;
 
-    public function __construct(DraftProductRepository $draftProductRepository, PublishProductRepository $publishProductRepository)
+    public function __construct(DraftProductRepository $draftProductRepository, PublishedProductRepository $publishProductRepository)
     {
         $this->draftProductRepository = $draftProductRepository;
         $this->publishProductRepository = $publishProductRepository;

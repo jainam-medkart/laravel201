@@ -8,7 +8,7 @@ use App\Models\PublishedProduct;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class PublishProductRepository {
+class PublishedProductRepository {
 
     public function getActive($perPage = 15)
     {
