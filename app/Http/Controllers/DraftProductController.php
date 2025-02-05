@@ -112,6 +112,8 @@ class DraftProductController extends Controller {
             
             $data = $request->except('status');
             $data = $request->except('is_published');
+
+            $data['status'] = DraftProductStatus::DRAFT;
             $data['updated_by'] = auth()->id();
 
             $draftProduct = $this->draftProductRepository->update($id, $data);
