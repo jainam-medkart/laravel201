@@ -19,6 +19,7 @@ class DraftProductFactory extends Factory
             'description' => $this->faker->sentence,
             'manufacturer' => $this->faker->company,
             'mrp' => $this->faker->randomFloat(2, 1, 1000),
+            'is_published' => false,
             'is_active' => $this->faker->boolean,
             'is_banned' => $this->faker->boolean,
             'is_assured' => $this->faker->boolean,

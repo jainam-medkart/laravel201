@@ -20,7 +20,7 @@ class PublishedProduct extends Model
         'is_assured',
         'is_discountinued',
         'is_refrigerated',
-        'is_published',
+        'published_at',
         'status',
         'category_id',
         'created_by',

@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\DB;
 
 class DraftProductRepository {
 
-    public function getActive()
+    public function getActive($perPage = 15)
     {
-        return DraftProduct::with(['category', 'molecules'])->where('is_active', true)->whereNull('deleted_at')->get();
+        return DraftProduct::with(['category', 'molecules'])
+            ->where('is_active', true)
+            ->whereNull('deleted_at')
+            ->paginate($perPage);
     }
 
-    public function getAll() {
-        // return DraftProduct::withTrashed()->get();
-        return DraftProduct::with(['category', 'molecules'])->withTrashed()->get();
-
+    public function getAll($perPage = 15)
+    {
+        return DraftProduct::with(['category', 'molecules'])
+            ->withTrashed()
+            ->paginate($perPage);
     }
 
     public function getById($id) {

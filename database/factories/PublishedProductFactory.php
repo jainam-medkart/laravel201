@@ -25,7 +25,6 @@ class PublishedProductFactory extends Factory
             'is_assured' => $this->faker->boolean,
             'is_discountinued' => $this->faker->boolean,
             'is_refrigerated' => $this->faker->boolean,
-            'is_published' => $this->faker->boolean,
             'category_id' => Category::factory(),
             'created_by' => User::factory(),
             'updated_by' => User::factory(),

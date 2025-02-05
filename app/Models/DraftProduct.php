@@ -25,7 +25,8 @@ class DraftProduct extends Model
         'category_id',
         'created_by',
         'updated_by',
-        'deleted_by'
+        'deleted_by',
+        'is_published',
     ];
 
     protected $hidden = [
@@ -59,6 +60,6 @@ class DraftProduct extends Model
 
     public function publishedProduct()
     {
-        return $this->hasOne(PublishedProduct::class);
+        return $this->belongsTo(PublishedProduct::class, 'published_id');
     }
 }

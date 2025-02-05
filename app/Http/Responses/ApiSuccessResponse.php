@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiSuccessResponse
 {
@@ -12,6 +13,20 @@ class ApiSuccessResponse
             'status_code' => $statusCode,
             'timestamp' => now()->toDateTimeString(),
         ];
+
+        if ($data instanceof LengthAwarePaginator) {
+            $paginationDetails = [
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'from' => $data->firstItem(),
+                'to' => $data->lastItem(),
+            ];
+
+            $metadata = array_merge($metadata, ['pagination' => $paginationDetails]);
+            $data = $data->items();
+        }
 
         $response = [
             'status' => 'success',

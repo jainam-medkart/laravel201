@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\DraftProductStatus;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Jobs\PublishDraftProduct;
@@ -24,12 +25,16 @@ class DraftProductController extends Controller {
 
     public function getAll()
     {
-        return ApiSuccessResponse::create($this->draftProductRepository->getAll(), 'All draft products fetched successfully');
+        $perPage = request()->get('per_page', 15);
+        $draftProducts = $this->draftProductRepository->getAll($perPage);
+        return ApiSuccessResponse::create($draftProducts, 'All draft products fetched successfully');
     }
 
     public function getAllActive()
     {
-        return ApiSuccessResponse::create($this->draftProductRepository->getActive(), 'Draft products fetched successfully');
+        $perPage = request()->get('per_page', 15);
+        $draftProducts = $this->draftProductRepository->getActive($perPage);
+        return ApiSuccessResponse::create($draftProducts, 'Draft products fetched successfully');
     }
 
     public function getById($id)
@@ -141,6 +146,10 @@ class DraftProductController extends Controller {
     {
         try {
             $draftProduct = $this->draftProductRepository->getById($id);
+
+            if ($draftProduct->status !== DraftProductStatus::APPROVED) {
+                return ApiErrorResponse::create(new Exception('Draft product status must be approved to publish.'), 400);
+            }
 
             $draftProduct->load(['category', 'molecules']);
 

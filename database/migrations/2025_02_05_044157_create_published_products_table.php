@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('is_assured')->default(false);
             $table->boolean('is_discountinued')->default(false);
             $table->boolean('is_refrigerated')->default(false);
-            $table->boolean('is_published')->default(false);
+            $table->timestamp('published_at')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
