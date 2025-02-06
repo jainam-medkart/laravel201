@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
+use App\Http\Responses\ApiErrorResponse;
 
 class DraftProductCreateRequest extends FormRequest
 {
@@ -36,5 +39,19 @@ class DraftProductCreateRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'molecule_ids' => 'array|exists:molecules,id',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $response = ApiErrorResponse::create(new ValidationException($validator), 422, $validator->errors()->toArray());
+        throw new ValidationException($validator, $response);
     }
 }

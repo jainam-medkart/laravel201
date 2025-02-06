@@ -8,6 +8,7 @@ use App\Http\Requests\DraftProductUpdateRequest;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Jobs\PublishDraftProduct;
+use App\Models\DraftProduct;
 use App\Repositories\DraftProductRepository;
 use App\Repositories\PublishedProductRepository;
 use Exception;
@@ -51,6 +52,45 @@ class DraftProductController extends Controller {
             return ApiErrorResponse::create($e, 404);
         }
     }
+
+    // public function create(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'name' => 'required|string|max:255|unique:draft_products,name',
+    //             'description' => 'nullable|string',
+    //             'manufacturer' => 'required|string|max:255',
+    //             'mrp' => 'required|numeric',
+    //             'is_active' => 'boolean',
+    //             'is_banned' => 'boolean',
+    //             'is_assured' => 'boolean',
+    //             'is_discountinued' => 'boolean',
+    //             'is_refrigerated' => 'boolean',
+    //             'is_published' => 'boolean',
+    //             // 'status' => 'required|string|in:draft,pending,approved,rejected',
+    //             'category_id' => 'required|exists:categories,id',
+    //             'molecule_ids' => 'array|exists:molecules,id',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             throw new ValidationException($validator);
+    //         }
+
+    //         $data = $request->all();
+    //         $data['status'] = DraftProductStatus::DRAFT;
+    //         $data['created_by'] = auth()->id();
+    //         $data['updated_by'] = auth()->id();
+    //         $draftProduct = $this->draftProductRepository->create($data);
+
+    //         return ApiSuccessResponse::create($draftProduct, 'Draft product created successfully', 201);
+    //     } catch (ValidationException $e) {
+    //         return ApiErrorResponse::create($e, 422, $e->errors());
+    //     } catch (QueryException $e) {
+    //         return ApiErrorResponse::create($e, 400);
+    //     } catch (Exception $e) {
+    //         return ApiErrorResponse::create($e, 500);
+    //     }
+    // }
 
     public function create(DraftProductCreateRequest $request)
     {

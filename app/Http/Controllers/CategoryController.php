@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryCreateRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Repositories\CategoryRepository;
@@ -40,18 +42,9 @@ class CategoryController extends Controller {
         }
     }
 
-    public function create(Request $request)
+    public function create(CategoryCreateRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:categories,name',
-                'description' => 'nullable|string',
-            ]);
-
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-
             $data = $request->all();
             $data['created_by'] = auth()->id();
             $data['updated_by'] = auth()->id();
@@ -67,18 +60,9 @@ class CategoryController extends Controller {
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(CategoryUpdateRequest $request, $id)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:categories,name,' . $id,
-                'description' => 'nullable|string',
-            ]);
-
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-
             $data = $request->all();
             $data['updated_by'] = auth()->id();
             $category = $this->categoryRepository->update($id, $data);

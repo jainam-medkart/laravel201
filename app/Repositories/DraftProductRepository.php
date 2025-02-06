@@ -48,6 +48,7 @@ class DraftProductRepository {
     public function create(array $data)
     {
         return DB::transaction(function () use ($data) {
+            // dump($data);
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
 

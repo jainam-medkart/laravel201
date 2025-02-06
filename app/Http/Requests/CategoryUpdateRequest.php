@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Http\Responses\ApiErrorResponse;
 
-class DraftProductUpdateRequest extends FormRequest
+class CategoryUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,18 +27,8 @@ class DraftProductUpdateRequest extends FormRequest
         $id = $this->route('id');
 
         return [
-            'name' => 'required|string|max:255|unique:draft_products,name,' . $id,
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
             'description' => 'nullable|string',
-            'manufacturer' => 'required|string|max:255',
-            'mrp' => 'required|numeric',
-            'is_active' => 'boolean',
-            'is_banned' => 'boolean',
-            'is_assured' => 'boolean',
-            'is_discountinued' => 'boolean',
-            'is_refrigerated' => 'boolean',
-            'is_published' => 'boolean',
-            'category_id' => 'required|exists:categories,id',
-            'molecule_ids' => 'array|exists:molecules,id',
         ];
     }
 
@@ -47,4 +37,5 @@ class DraftProductUpdateRequest extends FormRequest
         $response = ApiErrorResponse::create(new ValidationException($validator), 422, $validator->errors()->toArray());
         throw new ValidationException($validator, $response);
     }
+    
 }
