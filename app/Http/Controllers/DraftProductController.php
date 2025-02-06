@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Constants\DraftProductStatus;
+use App\Http\Requests\DraftProductCreateRequest;
+use App\Http\Requests\DraftProductUpdateRequest;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 use App\Jobs\PublishDraftProduct;
@@ -50,30 +52,11 @@ class DraftProductController extends Controller {
         }
     }
 
-    public function create(Request $request)
+    public function create(DraftProductCreateRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:draft_products,name',
-                'description' => 'nullable|string',
-                'manufacturer' => 'required|string|max:255',
-                'mrp' => 'required|numeric',
-                'is_active' => 'boolean',
-                'is_banned' => 'boolean',
-                'is_assured' => 'boolean',
-                'is_discountinued' => 'boolean',
-                'is_refrigerated' => 'boolean',
-                'is_published' => 'boolean',
-                'status' => 'required|string|in:draft,pending,approved,rejected',
-                'category_id' => 'required|exists:categories,id',
-                'molecule_ids' => 'array|exists:molecules,id',
-            ]);
-
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-
             $data = $request->all();
+            $data['status'] = DraftProductStatus::DRAFT;
             $data['created_by'] = auth()->id();
             $data['updated_by'] = auth()->id();
             $draftProduct = $this->draftProductRepository->create($data);
@@ -88,31 +71,10 @@ class DraftProductController extends Controller {
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(DraftProductUpdateRequest $request, $id)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:draft_products,name,' . $id,
-                'description' => 'nullable|string',
-                'manufacturer' => 'required|string|max:255',
-                'mrp' => 'required|numeric',
-                'is_active' => 'boolean',
-                'is_banned' => 'boolean',
-                'is_assured' => 'boolean',
-                'is_discountinued' => 'boolean',
-                'is_refrigerated' => 'boolean',
-                'is_published' => 'boolean',
-                'category_id' => 'required|exists:categories,id',
-                'molecule_ids' => 'array|exists:molecules,id',
-            ]);
-
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-            
-            $data = $request->except('status');
-            $data = $request->except('is_published');
-
+            $data = $request->except(['status', 'is_published']);
             $data['status'] = DraftProductStatus::DRAFT;
             $data['updated_by'] = auth()->id();
 
