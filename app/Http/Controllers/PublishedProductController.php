@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
+use App\Models\PublishedProduct;
 use App\Repositories\PublishedProductRepository;
 use Exception;
+use Illuminate\Http\Request;
 
 class PublishedProductController extends Controller {
 
@@ -37,6 +39,19 @@ class PublishedProductController extends Controller {
             return ApiSuccessResponse::create($publishedProduct, 'Published product fetched successfully');
         } catch (Exception $e) {
             return ApiErrorResponse::create($e, 404);
+        }
+    }
+    
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->input('query');
+
+            $results = PublishedProduct::search($query)->get();
+
+            return ApiSuccessResponse::create($results, 'Search results fetched successfully');
+        } catch (Exception $e) {
+            return ApiErrorResponse::create($e, 500);
         }
     }
 }

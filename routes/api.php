@@ -49,9 +49,13 @@ Route::prefix('draft-products')->middleware('auth:sanctum')->group(function () {
     Route::put('/{id}/status', [DraftProductController::class, 'updateStatus']);
 });
 
-Route::prefix('products')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', [PublishedProductController::class, 'getAllActive']);
+Route::prefix('products')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/', [PublishedProductController::class, 'create']);
+        Route::get('/', [PublishedProductController::class, 'getAllActive']);
+    });
+
+    Route::get('/search', [PublishedProductController::class, 'search']);
     Route::get('/all', [PublishedProductController::class, 'getAll']);
     Route::get('/{id}', [PublishedProductController::class, 'getById']);
-    Route::post('/', [PublishedProductController::class, 'create']);
 });
