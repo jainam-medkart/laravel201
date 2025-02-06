@@ -16,20 +16,29 @@ class PublishedProductRepository {
 
     public function getActive($perPage = 15)
     {
-        return PublishedProduct::with(['category', 'molecules'])
-            ->where('is_active', true)
-            ->whereNull('deleted_at')
-            ->paginate($perPage);
+        $cacheKey = "published_products_active_{$perPage}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($perPage) {
+            return PublishedProduct::with(['category', 'molecules'])
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->paginate($perPage);
+        });
     }
 
     public function getAll($perPage = 15)
     {
-        return PublishedProduct::with(['category', 'molecules'])
-            ->withTrashed()
-            ->paginate($perPage);
+        $cacheKey = "published_products_all_{$perPage}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($perPage) {
+            return PublishedProduct::with(['category', 'molecules'])
+                ->withTrashed()
+                ->paginate($perPage);
+        });
     }
 
-    public function getById($id) {
+    public function getById($id)
+    {
         $cacheKey = "published_product_{$id}";
 
         return Cache::remember($cacheKey, 3600, function () use ($id) {
@@ -54,7 +63,6 @@ class PublishedProductRepository {
             $moleculeIds = $data['molecule_ids'] ?? [];
             $categoryId = $data['category_id'] ?? null;
 
-            // Generate ws_code
             $data['ws_code'] = $this->generateWsCode();
 
             $publishedProduct = PublishedProduct::create($data);
@@ -67,6 +75,9 @@ class PublishedProductRepository {
                 $publishedProduct->category()->associate(Category::findOrFail($categoryId));
                 $publishedProduct->save();
             }
+
+            Cache::forget("published_products_active_15");
+            Cache::forget("published_products_all_15");
 
             return $publishedProduct->load(['category', 'molecules']);
         });
@@ -89,6 +100,10 @@ class PublishedProductRepository {
                 $publishedProduct->category()->associate(Category::findOrFail($categoryId));
                 $publishedProduct->save();
             }
+
+            Cache::forget("published_product_{$id}");
+            Cache::forget("published_products_active_15");
+            Cache::forget("published_products_all_15");
 
             return $publishedProduct->load(['category', 'molecules']);
         });
@@ -115,11 +130,15 @@ class PublishedProductRepository {
                     'category_id' => $draftProduct->category_id,
                     'updated_by' => $draftProduct->updated_by,
                     'updated_at' => now(),
-                    'combination_string' => $combinationString, // Set combination_string
+                    'combination_string' => $combinationString,
                 ]);
 
                 $publishedProduct->molecules()->sync($draftProduct->molecules->pluck('id')->toArray());
             }
+
+            Cache::forget("published_product_{$id}");
+            Cache::forget("published_products_active_15");
+            Cache::forget("published_products_all_15");
 
             return $publishedProduct;
         });
@@ -128,10 +147,8 @@ class PublishedProductRepository {
     public function publish(DraftProduct $draftProduct, $userId)
     {
         return DB::transaction(function () use ($draftProduct, $userId) {
-            // Generate combination_string
             $combinationString = $draftProduct->molecules->pluck('name')->implode('+');
 
-            // Generate ws_code
             $wsCode = $this->generateWsCode();
 
             $publishedProduct = PublishedProduct::create([
@@ -151,8 +168,8 @@ class PublishedProductRepository {
                 'draft_product_id' => $draftProduct->id,
                 'published_by' => $userId,
                 'published_at' => now(),
-                'combination_string' => $combinationString, // Set combination_string
-                'ws_code' => $wsCode . "", // Set ws_code
+                'combination_string' => $combinationString,
+                'ws_code' => $wsCode . "",
             ]);
 
             $publishedProduct->molecules()->attach($draftProduct->molecules->pluck('id')->toArray());
@@ -162,6 +179,9 @@ class PublishedProductRepository {
             $draftProduct->update([
                 'is_published' => true,
             ]);
+
+            Cache::forget("published_products_active_15");
+            Cache::forget("published_products_all_15");
 
             return $publishedProduct;
         });
@@ -175,6 +195,11 @@ class PublishedProductRepository {
             'deleted_by' => Auth::id(),
         ]);
         $publishedProduct->delete();
+
+        Cache::forget("published_product_{$id}");
+        Cache::forget("published_products_active_15");
+        Cache::forget("published_products_all_15");
+
         return $publishedProduct;
     }
 
@@ -187,6 +212,11 @@ class PublishedProductRepository {
             'deleted_at' => null,
         ]);
         $publishedProduct->restore();
+
+        Cache::forget("published_product_{$id}");
+        Cache::forget("published_products_active_15");
+        Cache::forget("published_products_all_15");
+
         return $publishedProduct;
     }
 }
